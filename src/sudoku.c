@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include "sudoku.h"
+#include "ga.h"
 
 GameState gameState;
 
