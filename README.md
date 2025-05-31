@@ -1,9 +1,12 @@
 # Genetic-Algorithm-Sudoku
 sudoku for the 3rd time, god help me &lt;3
 
+---
+
 note: i added getchar(); after each print of generation because when running the app it either:
-    - freezes completely, only says generation 0 and its fitness
-    - it crashes; 
+1. freezes completely, only says generation 0 and its fitness
+2. it crashes; 
+
 so i added getchar to manually check the program and all the generations... if they even show up...
 
 <pre>
@@ -22,3 +25,5 @@ MAIN STEPS
 gcc main.c sudoku.c ga.c util.c -o ga_solvedsudoku
 ```
 run either the .exe app in the folder or by cmd
+
+![image](https://github.com/user-attachments/assets/8327e11b-b4c0-46f0-a2f7-715659e8fe00)
