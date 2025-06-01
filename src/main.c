@@ -25,7 +25,7 @@ int main(){
     gameState.sizeOfTheBoard = 9;
     gameState.board = sudokuGenerator();
 
-    
+    // copies the generated board into grid
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             grid[i][j] = gameState.board[i][j];
@@ -40,12 +40,14 @@ int main(){
     printf("initial filled grid:\n"); //informational
     printGrid(grid);
 
+    // fills population based on the original puzzle, randomly filling the rest
+    // each individual is evaluated for its fitness; how close it is to a valid sudoku boardd
     initializePopulation(population, grid, fixed);
 
     Individual best_solution_ever;
     best_solution_ever.fitness = -1;
 
-    // main loop
+    // main loop for a num of generations
     for (int generation = 0; generation < NUM_GENERATIONS; generation++) {
 
         evaluatePopulation(population);
@@ -61,14 +63,19 @@ int main(){
         if (current_best.fitness > best_solution_ever.fitness) {
             best_solution_ever = current_best;
             printf("Generation %d: New better solution - fitness = %d\n", generation, best_solution_ever.fitness);
-            getchar();
-            getchar();
         } 
         else {
-            printf("Generation %d: Current best fitness = %d, Best ever fitness = %d\n", generation, current_best.fitness, best_solution_ever.fitness);
-            getchar();
-            getchar();
+            if (generation % 1000 == 0){
+                printf("Generation %d: Current best fitness = %d, Best ever fitness = %d\n", generation, current_best.fitness, best_solution_ever.fitness);
+            }
         }
+
+        // if perfect solution if found
+        if (best_solution_ever.fitness == 243) {
+            printf("Perfect solution found in generation %d: fitness = %d\n", generation, best_solution_ever.fitness);
+            break;
+        }
+
 
         for (int current_population_idx = 0; current_population_idx < POPULATION_SIZE; current_population_idx += 2) {
             Individual parent1 = selectParent(population);
@@ -76,7 +83,7 @@ int main(){
 
             Individual child1, child2;
 
-            crossover(parent1, parent2, &child1, &child2);
+            crossover(parent1, parent2, &child1, &child2, fixed);
 
             mutate(&child1, fixed);
             mutate(&child2, fixed);

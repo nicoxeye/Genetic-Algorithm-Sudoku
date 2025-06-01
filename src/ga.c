@@ -10,19 +10,12 @@
 #define SIZE 9
 #define BOX 3
 
-#define POPULATION_SIZE 100
-#define NUM_GENERATIONS 200
-#define MUTATION_RATE 0.05
-#define CROSSOVER_RATE 0.7
-
 int computeFitness(int grid[SIZE][SIZE]);
 void calculateFitness(Individual *ind);
 void evaluatePopulation(Individual population[]);
 Individual selectParent(Individual population[]);
-void crossover(Individual parent1, Individual parent2, Individual *child1, Individual *child2);
+void crossover(Individual parent1, Individual parent2, Individual *child1, Individual *child2, bool fixed[SIZE][SIZE]);
 void mutate(Individual *individual, bool fixed[SIZE][SIZE]);
-void runGA(Individual population[], bool fixed[SIZE][SIZE]);
-void initializeIndividual(Individual *ind, int baseGrid[SIZE][SIZE], bool fixed[SIZE][SIZE]);
 
 
 // fitness = total number of unique digits in all rows, columns, and boxes
@@ -120,7 +113,7 @@ Individual selectParent(Individual population[]) {
 
     for (int i = 1; i < tournament_size; i++) {
         Individual current = population[rand() % POPULATION_SIZE];
-        if (current.fitness > best_in_tournament.fitness) {
+        if (current.fitness >= best_in_tournament.fitness) {
             best_in_tournament = current;
         }
     }
@@ -131,8 +124,8 @@ Individual selectParent(Individual population[]) {
 
 
 // crossing two parents and creating children
-void crossover(Individual parent1, Individual parent2, Individual *child1, Individual *child2) {
-    // copying genes
+void crossover(Individual parent1, Individual parent2, Individual *child1, Individual *child2, bool fixed[SIZE][SIZE]) {
+    // copy parents into children
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             child1->grid[i][j] = parent1.grid[i][j];
@@ -140,16 +133,18 @@ void crossover(Individual parent1, Individual parent2, Individual *child1, Indiv
         }
     }
 
-
-    if ((double)rand() / RAND_MAX < CROSSOVER_RATE) {
+    if (((double)rand() / RAND_MAX) < CROSSOVER_RATE) {
+        // a random row crossover point
         int crossover_row = rand() % SIZE;
-        int crossover_col = rand() % SIZE;
 
+        // swap rows from crossover_row to end, but skip fixed cells
         for (int i = crossover_row; i < SIZE; i++) {
-            for (int j = (i == crossover_row ? crossover_col : 0); j < SIZE; j++) {
-                int temp = child1->grid[i][j];
-                child1->grid[i][j] = child2->grid[i][j];
-                child2->grid[i][j] = temp;
+            for (int j = 0; j < SIZE; j++) {
+                if (!fixed[i][j]) {
+                    int temp = child1->grid[i][j];
+                    child1->grid[i][j] = child2->grid[i][j];
+                    child2->grid[i][j] = temp;
+                }
             }
         }
     }
@@ -159,30 +154,76 @@ void crossover(Individual parent1, Individual parent2, Individual *child1, Indiv
 }
 
 
-// mutating individual
+// mutating an individual
 void mutate(Individual *individual, bool fixed[SIZE][SIZE]) {
-    for (int boxRow = 0; boxRow < BOX; boxRow++) {
-        for (int boxCol = 0; boxCol < BOX; boxCol++) {
+    for (int boxRow = 0; boxRow < 3; boxRow++) {
+        for (int boxCol = 0; boxCol < 3; boxCol++) {
+            // mutation rate
+            if (((double)rand() / RAND_MAX) < MUTATION_RATE) {
+                // collecting mutable cells in the current 3x3 box
+                // checks it with the fixed board :]
+                int mutable_cells[SIZE][2];
+                int count = 0;
 
-            if ((double)rand() / RAND_MAX < MUTATION_RATE) {
-                // picking two mutable positions in the same box
-                int i1, j1, i2, j2;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        int r = boxRow * 3 + i;
+                        int c = boxCol * 3 + j;
+                        if (!fixed[r][c]) {
+                            mutable_cells[count][0] = r;
+                            mutable_cells[count][1] = c;
+                            count++;
+                        }
+                    }
+                }
 
-                do {
-                    i1 = boxRow * BOX + rand() % BOX;
-                    j1 = boxCol * BOX + rand() % BOX;
-                } while (fixed[i1][j1]);
+                // must have at least two mutable cells to perform a swap
+                if (count >= 2) {
+                    // choosing the cells^
+                    int idx1 = rand() % count;
+                    int idx2 = rand() % count;
+                    while (idx2 == idx1) idx2 = rand() % count;
 
-                do {
-                    i2 = boxRow * BOX + rand() % BOX;
-                    j2 = boxCol * BOX + rand() % BOX;
-                } while (fixed[i2][j2] || (i1 == i2 && j1 == j2));
+                    int r1 = mutable_cells[idx1][0];
+                    int c1 = mutable_cells[idx1][1];
+                    int r2 = mutable_cells[idx2][0];
+                    int c2 = mutable_cells[idx2][1];
 
-                // swapping values
-                int temp = individual->grid[i1][j1];
-                individual->grid[i1][j1] = individual->grid[i2][j2];
-                individual->grid[i2][j2] = temp;
+                    // swapping values
+                    int temp = individual->grid[r1][c1];
+                    individual->grid[r1][c1] = individual->grid[r2][c2];
+                    individual->grid[r2][c2] = temp;
+                }
             }
         }
     }
+
+    // additional mutation; swap two random non-fixed cells in the same row for more diversity cause it got stuck often in the first generation
+    if (((double)rand() / RAND_MAX) < MUTATION_RATE) {
+        int row = rand() % SIZE;
+
+        // find non-fixed cells in row
+        int mutable_cells[SIZE];
+        int count = 0;
+
+        for (int col = 0; col < SIZE; col++) {
+            if (!fixed[row][col]) {
+                mutable_cells[count++] = col;
+            }
+        }
+
+        if (count >= 2) {
+            int idx1 = rand() % count;
+            int idx2 = rand() % count;
+            while (idx2 == idx1) idx2 = rand() % count;
+
+            int c1 = mutable_cells[idx1];
+            int c2 = mutable_cells[idx2];
+
+            int temp = individual->grid[row][c1];
+            individual->grid[row][c1] = individual->grid[row][c2];
+            individual->grid[row][c2] = temp;
+        }
+    }
 }
+

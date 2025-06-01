@@ -13,9 +13,6 @@ void fillGrid(int grid[SIZE][SIZE], bool fixed[SIZE][SIZE]);
 bool fixedValueInBox(int grid[SIZE][SIZE], bool fixed[SIZE][SIZE], int blockRow, int blockCol, int val);
 void initFixed(int grid[SIZE][SIZE], bool fixed[SIZE][SIZE]);
 void printGrid(int grid[SIZE][SIZE]);
-void generate_neighbor_inplace(int grid[SIZE][SIZE], bool fixed[SIZE][SIZE]);
-void solveSudoku_SA(int grid[SIZE][SIZE], bool fixed[SIZE][SIZE], double T_start, double T_end, double alpha, int max_iterations);
-
 
 // fills the spots; '0's on the board with numbers 1-9
 // makes sure no digit is duplicated within the box
