@@ -2,13 +2,6 @@
 sudoku for the 3rd time, god help me &lt;3
 
 ---
-
-note: i added getchar(); after each print of generation because when running the app it either:
-1. freezes completely, only says generation 0 and its fitness
-2. it crashes; 
-
-so i added getchar to manually check the program and all the generations... if they even show up...
-
 <pre>
 MAIN STEPS
         1. For each generation:
@@ -19,6 +12,19 @@ MAIN STEPS
             - Exit early if perfect solution is found
         2. After loop: Print best solution overall
 </pre>
+
+---
+### FITNESS EXPLANATION
+
+- each row, column, and box can contribute up to 9 unique digits
+- there are 9 rows + 9 columns + 9 boxes = 27 groups
+- maximum fitness = 27 × 9 = 243
+  
+which means a fully valid Sudoku with no repeats anywhere
+
+## EXAMPLES WHEN RUNNING THE PROGRAM
+
+![image](https://github.com/user-attachments/assets/81bcd57b-6134-4d7f-8041-b35b310c9045)
 
 ### BUILDING THE APP:
 ```
