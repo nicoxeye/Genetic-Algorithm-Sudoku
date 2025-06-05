@@ -23,6 +23,7 @@ typedef struct {
 Individual rouletteSelection(Individual population[]);
 void multiPointCrossover(Individual parent1, Individual parent2, Individual *child1, Individual *child2, bool fixed[SIZE][SIZE]);
 void uniformCrossover(Individual parent1, Individual parent2, Individual *child, bool fixed[SIZE][SIZE]);
+void simpleMutate(Individual *individual, bool fixed[SIZE][SIZE]);
 
 /*
 roulette selection chooses individuals proportionally to their fitness
@@ -116,3 +117,51 @@ void uniformCrossover(Individual parent1, Individual parent2, Individual *child,
     // resetting fitness
     child->fitness = 0;
 }
+
+
+// mutating an individual
+void simpleMutate(Individual *individual, bool fixed[SIZE][SIZE]) {
+    for (int boxRow = 0; boxRow < 3; boxRow++) {
+        for (int boxCol = 0; boxCol < 3; boxCol++) {
+            // mutation rate
+            if (((double)rand() / RAND_MAX) < MUTATION_RATE) {
+                // collecting mutable cells in the current 3x3 box
+                // checks it with the fixed board :]
+                int mutable_cells[SIZE][2];
+                int count = 0;
+
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        int r = boxRow * 3 + i;
+                        int c = boxCol * 3 + j;
+                        if (!fixed[r][c]) {
+                            mutable_cells[count][0] = r;
+                            mutable_cells[count][1] = c;
+                            count++;
+                        }
+                    }
+                }
+
+                // must have at least two mutable cells to perform a swap
+                if (count >= 2) {
+                    // choosing the cells^
+                    int idx1 = rand() % count;
+                    int idx2 = rand() % count;
+                    while (idx2 == idx1) idx2 = rand() % count;
+
+                    int r1 = mutable_cells[idx1][0];
+                    int c1 = mutable_cells[idx1][1];
+                    int r2 = mutable_cells[idx2][0];
+                    int c2 = mutable_cells[idx2][1];
+
+                    // swapping values
+                    int temp = individual->grid[r1][c1];
+                    individual->grid[r1][c1] = individual->grid[r2][c2];
+                    individual->grid[r2][c2] = temp;
+                }
+            }
+        }
+    }
+
+}
+
