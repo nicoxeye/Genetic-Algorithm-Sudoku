@@ -24,7 +24,7 @@ which means a fully valid Sudoku with no repeats anywhere
 
 ## EXAMPLES WHEN RUNNING THE PROGRAM
 
-![image](https://github.com/user-attachments/assets/81bcd57b-6134-4d7f-8041-b35b310c9045)
+![image](https://github.com/user-attachments/assets/d1ea81ac-1059-408e-9794-7078673842b3)
 
 ### BUILDING THE APP:
 ```
