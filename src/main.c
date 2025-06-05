@@ -89,10 +89,10 @@ int main(){
             mutate(&child2, fixed);
             
 
-            next_population[current_population_idx++] = child1;
+            next_population[current_population_idx] = child1;
 
-            if (current_population_idx < POPULATION_SIZE) {
-                next_population[current_population_idx++] = child2;
+            if (current_population_idx + 1 < POPULATION_SIZE) {
+                next_population[current_population_idx + 1] = child2;
             }
         }
 
